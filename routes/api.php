@@ -5,7 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use App\Http\Controllers\ProgresController;
+// use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::group([
   'prefix' => 'auth'
@@ -48,6 +49,13 @@ Route::group([
     Route::post('/manager', [KaryawanController::class, 'createManager']);
     Route::post('/manager/{id}', [KaryawanController::class, 'updateManager']);
     Route::delete('/manager/{id}', [KaryawanController::class, 'deleteManager']);
+
+    // karyawan
+    Route::get('/list', [KaryawanController::class, 'getAllKaryawan']);
+    Route::get('/by-manager', [KaryawanController::class, 'getMyKaryawan']);
+    Route::post('/create', [KaryawanController::class, 'createKaryawan']);
+    Route::post('/update/{id}', [KaryawanController::class, 'updateKaryawan']);
+    Route::delete('/delete/{id}', [KaryawanController::class, 'deleteKaryawan']);
 
     // Coordinator
     Route::get('/coordinator', [KaryawanController::class, 'getAllCoordinator']);
@@ -95,5 +103,18 @@ Route::group([
     'middleware' => 'auth:api',
   ], function () {
     Route::get('/highlight', [DashboardController::class, 'highlightProject']);
+  });
+});
+
+Route::group([
+  'prefix' => 'progres'
+], function () {
+  Route::group([
+    'middleware' => 'auth:api',
+  ], function () {
+    Route::get('/list/{id}', [ProgresController::class, 'listProgresByProject']);
+    Route::post('/create', [ProgresController::class, 'createProgres']);
+    Route::post('/update', [ProgresController::class, 'updateProgres']);
+    Route::delete('/delete', [ProgresController::class, 'deleteProgres']);
   });
 });

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Divisi;
 use App\Models\Manager;
+use App\Models\Karyawan;
 use App\Models\Coordinator;
 use App\Models\Operasional;
 use Illuminate\Validation\ValidationException;
@@ -190,6 +191,109 @@ class KaryawanController extends Controller
             return response()->json(['id' => '0', 'data' => 'Gagal menghapus manager']);
         }
     }
+
+
+    // ========================= KARYAWAN =========================
+
+    public function getAllKaryawan()
+    {
+        try {
+            $karyawans = Karyawan::with('manager')->get();
+            return response()->json(['id' => '1', 'data' => $karyawans]);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil data karyawan']);
+        }
+    }
+
+    public function getMyKaryawan()
+    {
+        try {
+            $karyawans = Karyawan::with('manager')->where('id_manager', auth()->user()->id)->get();
+            return response()->json(['id' => '1', 'data' => $karyawans]);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil data karyawan']);
+        }
+    }
+
+    public function createKaryawan(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'nama' => 'required|string|max:255',
+                'alamat' => 'required|string',
+                'email' => 'required|email|unique:karyawans,email',
+                'no_hp' => 'required|string|max:20',
+                'jabatan' => 'required|string|max:100',
+                'id_manager' => 'required|exists:managers,id',
+            ]);
+
+            $karyawan = Karyawan::create($validated);
+
+            return response()->json([
+                'message' => 'Karyawan berhasil dibuat.',
+                'data' => $karyawan
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat membuat karyawan.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateKaryawan(Request $request, $id)
+    {
+        try {
+            $karyawan = Karyawan::findOrFail($id);
+
+            $validated = $request->validate([
+                'nama' => 'sometimes|required|string|max:255',
+                'alamat' => 'sometimes|required|string',
+                'email' => 'sometimes|required|email|unique:karyawans,email,' . $id,
+                'no_hp' => 'sometimes|required|string|max:20',
+                'jabatan' => 'sometimes|required|string|max:100',
+                'id_manager' => 'sometimes|required|exists:managers,id',
+            ]);
+
+            $karyawan->update($validated);
+
+            return response()->json([
+                'message' => 'Karyawan berhasil diperbarui.',
+                'data' => $karyawan
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Karyawan tidak ditemukan.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui karyawan.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteKaryawan($id)
+    {
+        try {
+            $karyawan = Karyawan::findOrFail($id);
+            $karyawan->delete();
+
+            return response()->json([
+                'message' => 'Karyawan berhasil dihapus.'
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Karyawan tidak ditemukan.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus karyawan.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     // ========================= COORDINATOR =========================
 
