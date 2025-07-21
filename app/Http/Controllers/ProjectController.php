@@ -108,71 +108,71 @@ class ProjectController extends Controller
     //     }
     // }
 
-public function createProject(Request $request)
-{
-    DB::beginTransaction();
+    public function createProject(Request $request)
+    {
+        DB::beginTransaction();
 
-    try {
-        // Jika tim_project dikirim dalam bentuk JSON string
-        $request->merge([
-            'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project
-        ]);
+        try {
+            // Jika tim_project dikirim dalam bentuk JSON string
+            $request->merge([
+                'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project
+            ]);
 
-        $request->validate([
-            'nama_proyek' => 'required|string',
-            'client' => 'required|string',
-            'total_nilai_kontrak' => 'required|numeric',
-            'rencana_biaya' => 'required|numeric',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'kategori' => 'required|in:0,1',
-            'id_manager' => 'required|exists:users,id',
-            'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-            'tim_project' => 'nullable|array',
-            'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
-        ]);
+            $request->validate([
+                'nama_proyek' => 'required|string',
+                'client' => 'required|string',
+                'total_nilai_kontrak' => 'required|numeric',
+                'rencana_biaya' => 'required|numeric',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'kategori' => 'required|in:0,1',
+                'id_manager' => 'required|exists:users,id',
+                'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'tim_project' => 'nullable|array',
+                'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
+            ]);
 
-        // Proses upload lampiran jika ada
-        $lampiranPath = null;
-        if ($request->hasFile('lampiran_proyek')) {
-            $lampiranPath = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
-        }
-
-        // Buat data project
-        $project = Project::create([
-            'nama_proyek' => $request->nama_proyek,
-            'client' => $request->client,
-            'total_nilai_kontrak' => $request->total_nilai_kontrak,
-            'realisasi_budget' => 0,
-            'rencana_biaya' => $request->rencana_biaya,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'id_manager' => $request->id_manager,
-            'kategori' => $request->kategori,
-            'lampiran_proyek' => $lampiranPath,
-        ]);
-
-        // Simpan anggota tim proyek
-        if ($request->has('tim_project')) {
-            foreach ($request->tim_project as $tim) {
-                TimProject::create([
-                    'id_project' => $project->id,
-                    'id_karyawan' => $tim['id_karyawan'],
-                ]);
-                // Catatan: `jenis_tim` tidak digunakan di tabel `tim_projects`, jadi diabaikan
+            // Proses upload lampiran jika ada
+            $lampiranPath = null;
+            if ($request->hasFile('lampiran_proyek')) {
+                $lampiranPath = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
             }
-        }
 
-        DB::commit();
-        return response()->json(['id' => '1', 'data' => $project], 201);
-    } catch (ValidationException $e) {
-        DB::rollBack();
-        return response()->json(['id' => '0', 'data' => $e->errors()], 422);
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return response()->json(['id' => '0', 'data' => 'Gagal membuat proyek. Error: ' . $th->getMessage()], 500);
+            // Buat data project
+            $project = Project::create([
+                'nama_proyek' => $request->nama_proyek,
+                'client' => $request->client,
+                'total_nilai_kontrak' => $request->total_nilai_kontrak,
+                'realisasi_budget' => 0,
+                'rencana_biaya' => $request->rencana_biaya,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'id_manager' => $request->id_manager,
+                'kategori' => $request->kategori,
+                'lampiran_proyek' => $lampiranPath,
+            ]);
+
+            // Simpan anggota tim proyek
+            if ($request->has('tim_project')) {
+                foreach ($request->tim_project as $tim) {
+                    TimProject::create([
+                        'id_project' => $project->id,
+                        'id_karyawan' => $tim['id_karyawan'],
+                    ]);
+                    // Catatan: `jenis_tim` tidak digunakan di tabel `tim_projects`, jadi diabaikan
+                }
+            }
+
+            DB::commit();
+            return response()->json(['id' => '1', 'data' => $project], 201);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['id' => '0', 'data' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['id' => '0', 'data' => 'Gagal membuat proyek. Error: ' . $th->getMessage()], 500);
+        }
     }
-}
 
 
     // 4. Menyelesaikan proyek (upload hasil)
@@ -232,8 +232,15 @@ public function createProject(Request $request)
     // 5. Update proyek
     public function updateProject(Request $request, $id)
     {
+        DB::beginTransaction();
+
         try {
             $project = Project::findOrFail($id);
+
+            // Jika tim_project dikirim dalam bentuk JSON string
+            $request->merge([
+                'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project
+            ]);
 
             $request->validate([
                 'nama_proyek' => 'sometimes|string',
@@ -244,24 +251,46 @@ public function createProject(Request $request)
                 'start_date' => 'sometimes|date',
                 'end_date' => 'sometimes|date|after_or_equal:start_date',
                 'kategori' => 'required|in:0,1',
-                // 'lampiran_proyek' => 'file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'tim_project' => 'nullable|array',
+                'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
             ]);
 
-            $data = $request->except('lampiran_proyek');
+            $data = $request->except(['lampiran_proyek', 'tim_project']);
 
+            // Proses upload lampiran jika ada
             if ($request->hasFile('lampiran_proyek')) {
                 $data['lampiran_proyek'] = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
             }
 
+            // Update data proyek
             $project->update($data);
 
+            // Update tim proyek (jika ada)
+            if ($request->has('tim_project')) {
+                // Hapus tim sebelumnya
+                TimProject::where('id_project', $project->id)->delete();
+
+                // Tambah tim baru
+                foreach ($request->tim_project as $tim) {
+                    TimProject::create([
+                        'id_project' => $project->id,
+                        'id_karyawan' => $tim['id_karyawan'],
+                    ]);
+                }
+            }
+
+            DB::commit();
             return response()->json(['id' => '1', 'data' => $project]);
         } catch (ValidationException $e) {
+            DB::rollBack();
             return response()->json(['id' => '0', 'data' => $e->errors()], 422);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json(['id' => '0', 'data' => 'Gagal mengupdate proyek. Error: ' . $th->getMessage()], 500);
         }
     }
+
 
     // 6. Hapus proyek
     public function deleteProject($id)
