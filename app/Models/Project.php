@@ -23,6 +23,8 @@ class Project extends Model
         'status',
         'kategori',
         'hasil_proyek', // file
+        'biaya_akomodasi',
+        'pihak_pemberi_biaya',
         'id_manager',
     ];
 

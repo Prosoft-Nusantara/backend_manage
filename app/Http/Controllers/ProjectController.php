@@ -139,7 +139,7 @@ class ProjectController extends Controller
             }
 
             // Buat data project
-            $project = Project::create([
+            $data = [
                 'nama_proyek' => $request->nama_proyek,
                 'client' => $request->client,
                 'total_nilai_kontrak' => $request->total_nilai_kontrak,
@@ -150,7 +150,16 @@ class ProjectController extends Controller
                 'id_manager' => $request->id_manager,
                 'kategori' => $request->kategori,
                 'lampiran_proyek' => $lampiranPath,
-            ]);
+            ];
+
+            // Jika kategori = '0', tambahkan key tambahan
+            if ($request->kategori == '0') {
+                $data['biaya_akomodasi'] = $request->biaya_akomodasi;
+                $data['pihak_pemberi_biaya'] = $request->pihak_pemberi_biaya;
+            }
+
+            $project = Project::create($data);
+
 
             // Simpan anggota tim proyek
             if ($request->has('tim_project')) {
@@ -252,6 +261,8 @@ class ProjectController extends Controller
                 'end_date' => 'sometimes|date|after_or_equal:start_date',
                 'kategori' => 'required|in:0,1',
                 'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'biaya_akomodasi' => 'sometimes|numeric',
+                'pihak_pemberi_biaya' => 'sometimes|string',
                 'tim_project' => 'nullable|array',
                 'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
             ]);

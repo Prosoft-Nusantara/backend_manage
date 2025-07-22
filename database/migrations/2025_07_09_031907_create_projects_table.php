@@ -35,6 +35,8 @@ class CreateProjectsTable extends Migration
                 '1' //  TIK 1B
             ]);
             $table->string('hasil_proyek')->nullable();
+            $table->integer('biaya_akomodasi')->nullable();
+            $table->string('pihak_pemberi_biaya')->nullable();
             $table->foreignId('id_manager')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

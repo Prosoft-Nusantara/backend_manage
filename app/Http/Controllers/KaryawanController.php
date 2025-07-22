@@ -221,22 +221,29 @@ class KaryawanController extends Controller
             $validated = $request->validate([
                 'nama' => 'required|string|max:255',
                 'alamat' => 'required|string',
-                'email' => 'required|email|unique:karyawans,email',
-                'no_hp' => 'required|string|max:20',
+                'email' => 'required|email',
+                'no_hp' => 'required|max:20',
                 'jabatan' => 'required|string|max:100',
-                'id_manager' => 'required|exists:managers,id',
+                'id_manager' => 'required',
             ]);
 
-            $karyawan = Karyawan::create($validated);
+            Karyawan::create([
+                'nama' => $validated['nama'],
+                'alamat' => $validated['alamat'],
+                'email' => $validated['email'],
+                'no_hp' => $validated['no_hp'],
+                'jabatan' => $validated['jabatan'],
+                'id_manager' => $validated['id_manager'],
+            ]);
 
             return response()->json([
-                'message' => 'Karyawan berhasil dibuat.',
-                'data' => $karyawan
+                'id' => '1',
+                'data' => 'Karyawan berhasil dibuat.'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan saat membuat karyawan.',
-                'error' => $e->getMessage()
+                'id' => '0',
+                'data' => $e->getMessage()
             ], 500);
         }
     }
@@ -258,17 +265,18 @@ class KaryawanController extends Controller
             $karyawan->update($validated);
 
             return response()->json([
-                'message' => 'Karyawan berhasil diperbarui.',
-                'data' => $karyawan
+                'id' => '1',
+                'data' => 'Karyawan berhasil diperbarui.'
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Karyawan tidak ditemukan.'
+                'id' => '0',
+                'data' => 'Karyawan tidak ditemukan.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan saat memperbarui karyawan.',
-                'error' => $e->getMessage()
+                'id' => 'Terjadi kesalahan saat memperbarui karyawan.',
+                'data' => $e->getMessage()
             ], 500);
         }
     }
@@ -280,16 +288,18 @@ class KaryawanController extends Controller
             $karyawan->delete();
 
             return response()->json([
-                'message' => 'Karyawan berhasil dihapus.'
+                'id' => '1',
+                'data' => 'Karyawan berhasil dihapus.'
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Karyawan tidak ditemukan.'
+                'id' => '0',
+                'data' => 'Karyawan tidak ditemukan.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan saat menghapus karyawan.',
-                'error' => $e->getMessage()
+                'id' => '1',
+                'data' => $e->getMessage()
             ], 500);
         }
     }
