@@ -37,4 +37,9 @@ class Project extends Model
     {
         return $this->hasMany(TimProject::class, 'id_project');
     }
+
+    public function aktifitasProject()
+    {
+        return $this->hasMany(Aktifitas::class, 'id_project');
+    }
 }
