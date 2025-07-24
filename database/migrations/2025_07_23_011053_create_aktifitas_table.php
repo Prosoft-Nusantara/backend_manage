@@ -20,6 +20,10 @@ class CreateAktifitasTable extends Migration
             $table->integer('biaya');
             $table->date('start_date');
             $table->date('end_date');
+            $table->enum('status',[
+                '0', // belum selesai
+                '1', // selesai
+            ])->default('0');
             $table->foreignId('id_project')->constrained('projects')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

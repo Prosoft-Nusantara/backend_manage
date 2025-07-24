@@ -15,6 +15,7 @@ class Aktifitas extends Model
         'biaya',
         'start_date',
         'end_date',
+        'status',
         'id_project',
     ];
 }

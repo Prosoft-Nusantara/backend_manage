@@ -87,7 +87,8 @@ Route::group([
     Route::post('/payment/{id}', [ProjectController::class, 'paymentProyek']);
     Route::post('/update/{id}', [ProjectController::class, 'updateProject']);
     Route::delete('/delete/{id}', [ProjectController::class, 'deleteProject']);
-
+    
+    Route::post('/aktifitas/{id}', [ProjectController::class, 'selesaikanAktifitas']);
     // tim
     Route::get('/detail/{id}', [ProjectController::class, 'detailProject']);
     Route::get('/karyawan', [ProjectController::class, 'listKaryawan']);

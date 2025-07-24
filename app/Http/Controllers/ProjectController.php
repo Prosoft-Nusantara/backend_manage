@@ -258,6 +258,20 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function selesaikanAktifitas($id)
+    {
+        try {
+            $aktifitas = Aktifitas::findOrFail($id);
+            if ($aktifitas->status == '1') {
+                return response()->json(['id' => '0', 'data' => 'Aktifitas sudah selesai.'], 500);
+            }
+            $aktifitas->update(['status' => '1']);
+            return response()->json(['id' => '1', 'data' => 'Aktifitas selesai.']);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal selesaikan aktifitas.'], 500);
+        }
+    }
+
     // 3. Membuat proyek (lampiran berupa file)
 
     // public function createProject(Request $request)
