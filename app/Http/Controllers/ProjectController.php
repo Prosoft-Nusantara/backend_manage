@@ -258,14 +258,22 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function selesaikanAktifitas($id)
+    public function selesaikanAktifitas(Request $request, $id)
     {
         try {
+            $validateData = $request->validate([
+                'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048'
+            ]);
             $aktifitas = Aktifitas::findOrFail($id);
+
+            $hasilPath = $request->file('file')->store('file_aktifitas', 'public');
             if ($aktifitas->status == '1') {
                 return response()->json(['id' => '0', 'data' => 'Aktifitas sudah selesai.'], 500);
             }
-            $aktifitas->update(['status' => '1']);
+            $aktifitas->update([
+                'status' => '1',
+                'file' => $hasilPath
+            ]);
             return response()->json(['id' => '1', 'data' => 'Aktifitas selesai.']);
         } catch (\Throwable $th) {
             return response()->json(['id' => '0', 'data' => 'Gagal selesaikan aktifitas.'], 500);

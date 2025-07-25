@@ -16,6 +16,7 @@ class Aktifitas extends Model
         'start_date',
         'end_date',
         'status',
+        'file',
         'id_project',
     ];
 }
