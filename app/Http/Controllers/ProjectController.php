@@ -210,8 +210,8 @@ class ProjectController extends Controller
             'id_manager'          => 'required|exists:users,id',
             'lampiran_proyek'     => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png|max:5120',
 
-            'biaya_akomodasi'     => 'required_if:kategori,0|numeric|min:0',
-            'pihak_pemberi_biaya' => 'required_if:kategori,0|string|max:255',
+            'biaya_akomodasi'     => 'string|min:0',
+            'pihak_pemberi_biaya' => 'string|max:255',
 
             'tim_project'               => 'nullable|array',
             'tim_project.*'             => 'array:id_karyawan',
