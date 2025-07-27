@@ -102,8 +102,10 @@ class ProjectController extends Controller
             ];
 
             if ($validated['kategori'] == '0') {
-                $data['biaya_akomodasi']     = $validated['biaya_akomodasi'];
-                $data['pihak_pemberi_biaya'] = $validated['pihak_pemberi_biaya'];
+                // $data['biaya_akomodasi']     = $validated['biaya_akomodasi'];
+                // $data['pihak_pemberi_biaya'] = $validated['pihak_pemberi_biaya'];
+                $data['biaya_akomodasi']     = $request['biaya_akomodasi'];
+                $data['pihak_pemberi_biaya'] = $request['pihak_pemberi_biaya'];
             }
 
             $project = Project::create($data);
