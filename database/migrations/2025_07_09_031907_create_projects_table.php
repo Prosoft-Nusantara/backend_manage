@@ -34,7 +34,8 @@ class CreateProjectsTable extends Migration
                 '0', //  TIK 1A
                 '1' //  TIK 1B
             ]);
-            $table->string('hasil_proyek')->nullable();
+            $table->string('bast_kontrak')->nullable(); // alis bast kontrak
+            $table->string('surat_pembayaran')->nullable(); // alis bast kontrak
             $table->integer('biaya_akomodasi')->nullable();
             $table->string('pihak_pemberi_biaya')->nullable();
             $table->foreignId('id_manager')->constrained('users')->onDelete('cascade')->onUpdate('cascade');

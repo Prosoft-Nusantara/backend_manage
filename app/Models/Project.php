@@ -22,7 +22,8 @@ class Project extends Model
         'lampiran_proyek', // file
         'status',
         'kategori',
-        'hasil_proyek', // file
+        'bast_kontrak', // file
+        'surat_pembayaran', // file
         'biaya_akomodasi',
         'pihak_pemberi_biaya',
         'id_manager',

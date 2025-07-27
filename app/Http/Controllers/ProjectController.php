@@ -258,6 +258,24 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function updateAktifitas(Request $request, $id)
+    {
+        try {
+            $validateData = $request->validate([
+                // 'aktivitas' => 'required|string|max:255',
+                'pic' => 'required|string|max:255',
+                'biaya' => 'required|numeric|min:0',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+            ]);
+            $aktifitas = Aktifitas::findOrFail($id);
+            $aktifitas->update($validateData);
+            return response()->json(['id' => '1', 'data' => 'Aktifitas berhasil diperbarui.']);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal memperbarui aktifitas. Error: ' . $th->getMessage()], 500);
+        }
+    }
+
     public function selesaikanAktifitas(Request $request, $id)
     {
         try {
@@ -265,6 +283,12 @@ class ProjectController extends Controller
                 'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048'
             ]);
             $aktifitas = Aktifitas::findOrFail($id);
+
+            $dataProject = Project::findOrFail($aktifitas->id_project);
+
+            $dataProject->update([
+                'realisasi_budget' => $dataProject->realisasi_budget + $aktifitas->biaya
+            ]);
 
             $hasilPath = $request->file('file')->store('file_aktifitas', 'public');
             if ($aktifitas->status == '1') {
@@ -282,175 +306,6 @@ class ProjectController extends Controller
 
     // 3. Membuat proyek (lampiran berupa file)
 
-    // public function createProject(Request $request)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // Jika tim_project dikirim dalam bentuk JSON string
-    //         $request->merge([
-    //             'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project
-    //         ]);
-
-    //         $request->validate([
-    //             'nama_proyek' => 'required|string',
-    //             'client' => 'required|string',
-    //             'total_nilai_kontrak' => 'required|numeric',
-    //             'rencana_biaya' => 'required|numeric',
-    //             'start_date' => 'required|date',
-    //             'end_date' => 'required|date|after_or_equal:start_date',
-    //             'kategori' => 'required|in:0,1',
-    //             'id_manager' => 'required|exists:users,id',
-    //             'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-    //             'tim_project' => 'nullable|array',
-    //             'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
-    //         ]);
-
-    //         // Proses upload lampiran jika ada
-    //         $lampiranPath = null;
-    //         if ($request->hasFile('lampiran_proyek')) {
-    //             $lampiranPath = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
-    //         }
-
-    //         // Buat data project
-    //         $data = [
-    //             'nama_proyek' => $request->nama_proyek,
-    //             'client' => $request->client,
-    //             'total_nilai_kontrak' => $request->total_nilai_kontrak,
-    //             'realisasi_budget' => 0,
-    //             'rencana_biaya' => $request->rencana_biaya,
-    //             'start_date' => $request->start_date,
-    //             'end_date' => $request->end_date,
-    //             'id_manager' => $request->id_manager,
-    //             'kategori' => $request->kategori,
-    //             'lampiran_proyek' => $lampiranPath,
-    //         ];
-
-    //         // Jika kategori = '0', tambahkan key tambahan
-    //         if ($request->kategori == '0') {
-    //             $data['biaya_akomodasi'] = $request->biaya_akomodasi;
-    //             $data['pihak_pemberi_biaya'] = $request->pihak_pemberi_biaya;
-    //         }
-
-    //         $project = Project::create($data);
-
-
-    //         // Simpan anggota tim proyek
-    //         if ($request->has('tim_project')) {
-    //             foreach ($request->tim_project as $tim) {
-    //                 TimProject::create([
-    //                     'id_project' => $project->id,
-    //                     'id_karyawan' => $tim['id_karyawan'],
-    //                 ]);
-    //                 // Catatan: `jenis_tim` tidak digunakan di tabel `tim_projects`, jadi diabaikan
-    //             }
-    //         }
-
-    //         DB::commit();
-    //         return response()->json(['id' => '1', 'data' => $project], 201);
-    //     } catch (ValidationException $e) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => $e->errors()], 422);
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => 'Gagal membuat proyek. Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
-    // public function createProject(Request $request)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // Parsing jika tim_project atau aktifitas berupa string JSON
-    //         $request->merge([
-    //             'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project,
-    //             'aktifitas' => is_string($request->aktifitas) ? json_decode($request->aktifitas, true) : $request->aktifitas
-    //         ]);
-
-    //         $request->validate([
-    //             'nama_proyek' => 'required|string',
-    //             'client' => 'required|string',
-    //             'total_nilai_kontrak' => 'required|numeric',
-    //             'rencana_biaya' => 'required|numeric',
-    //             'start_date' => 'required|date',
-    //             'end_date' => 'required|date|after_or_equal:start_date',
-    //             'kategori' => 'required|in:0,1',
-    //             'id_manager' => 'required|exists:users,id',
-    //             'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-    //             'tim_project' => 'nullable|array',
-    //             'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
-    //             'aktifitas' => 'nullable|array',
-    //             'aktifitas.*.aktivitas' => 'required|string',
-    //             'aktifitas.*.pic' => 'required|string',
-    //             'aktifitas.*.biaya' => 'required|numeric',
-    //             'aktifitas.*.start_date' => 'required|date',
-    //             'aktifitas.*.end_date' => 'required|date|after_or_equal:aktifitas.*.start_date',
-    //         ]);
-
-    //         // Upload file jika ada
-    //         $lampiranPath = null;
-    //         if ($request->hasFile('lampiran_proyek')) {
-    //             $lampiranPath = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
-    //         }
-
-    //         // Buat proyek
-    //         $data = [
-    //             'nama_proyek' => $request->nama_proyek,
-    //             'client' => $request->client,
-    //             'total_nilai_kontrak' => $request->total_nilai_kontrak,
-    //             'realisasi_budget' => 0,
-    //             'rencana_biaya' => $request->rencana_biaya,
-    //             'start_date' => $request->start_date,
-    //             'end_date' => $request->end_date,
-    //             'id_manager' => $request->id_manager,
-    //             'kategori' => $request->kategori,
-    //             'lampiran_proyek' => $lampiranPath,
-    //         ];
-
-    //         if ($request->kategori == '0') {
-    //             $data['biaya_akomodasi'] = $request->biaya_akomodasi;
-    //             $data['pihak_pemberi_biaya'] = $request->pihak_pemberi_biaya;
-    //         }
-
-    //         $project = Project::create($data);
-
-    //         // Simpan tim proyek
-    //         if (!empty($request->tim_project)) {
-    //             foreach ($request->tim_project as $tim) {
-    //                 TimProject::create([
-    //                     'id_project' => $project->id,
-    //                     'id_karyawan' => $tim['id_karyawan'],
-    //                 ]);
-    //             }
-    //         }
-
-    //         // Simpan aktifitas proyek
-    //         if (!empty($request->aktifitas)) {
-    //             foreach ($request->aktifitas as $act) {
-    //                 Aktifitas::create([
-    //                     'aktivitas' => $act['aktivitas'],
-    //                     'pic' => $act['pic'],
-    //                     'biaya' => $act['biaya'],
-    //                     'start_date' => $act['start_date'],
-    //                     'end_date' => $act['end_date'],
-    //                     'id_project' => $project->id,
-    //                 ]);
-    //             }
-    //         }
-
-    //         DB::commit();
-    //         return response()->json(['id' => '1', 'data' => $project], 201);
-    //     } catch (ValidationException $e) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => $e->errors()], 422);
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => 'Gagal membuat proyek. Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
-
 
     // 4. Menyelesaikan proyek (upload hasil)
     public function completeProject(Request $request, $id)
@@ -459,16 +314,18 @@ class ProjectController extends Controller
             $project = Project::findOrFail($id);
 
             $request->validate([
-                'hasil_proyek' => 'required|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-                'realisasi_budget' => 'required|numeric|min:0',
+                'bast_kontrak' => 'required|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'invoice' => 'required|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                // 'realisasi_budget' => 'required|numeric|min:0',
             ]);
 
-            $hasilPath = $request->file('hasil_proyek')->store('hasil_proyek', 'public');
+            $hasilPathBastKontrak = $request->file('bast_kontrak')->store('bast_kontrak', 'public');
+            $hasilPathInvoice = $request->file('invoice')->store('invoice', 'public');
 
             $project->update([
                 'status' => '1',
-                'hasil_proyek' => $hasilPath,
-                'realisasi_budget' => $request->realisasi_budget,
+                'bast_kontrak' => $hasilPathBastKontrak,
+                'invoice' => $hasilPathInvoice,
             ]);
 
             return response()->json(['id' => '1', 'data' => $project]);
@@ -486,15 +343,15 @@ class ProjectController extends Controller
             $project = Project::findOrFail($id);
 
             $request->validate([
-                'invoice' => 'required|file|mimes:pdf,doc,docx,xlsx,jpg,png',
+                'surat_pembayaran' => 'required|file|mimes:pdf,doc,docx,xlsx,jpg,png',
                 'tanggal_pembayaran' => 'required|date',
             ]);
 
-            $hasilPath = $request->file('invoice')->store('invoice', 'public');
+            $hasilPath = $request->file('surat_pembayaran')->store('surat_pembayaran', 'public');
 
             $project->update([
                 'status' => '2',
-                'invoice' => $hasilPath,
+                'surat_pembayaran' => $hasilPath,
                 'tanggal_pembayaran' => $request->tanggal_pembayaran,
             ]);
 
@@ -507,152 +364,6 @@ class ProjectController extends Controller
     }
 
     // 5. Update proyek
-    // public function updateProject(Request $request, $id)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         $project = Project::findOrFail($id);
-
-    //         // Jika tim_project dikirim dalam bentuk JSON string
-    //         $request->merge([
-    //             'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project
-    //         ]);
-
-    //         $request->validate([
-    //             'nama_proyek' => 'sometimes|string',
-    //             'client' => 'sometimes|string',
-    //             'total_nilai_kontrak' => 'sometimes|numeric',
-    //             'rencana_biaya' => 'sometimes|numeric',
-    //             'realisasi_budget' => 'sometimes|numeric',
-    //             'start_date' => 'sometimes|date',
-    //             'end_date' => 'sometimes|date|after_or_equal:start_date',
-    //             'kategori' => 'required|in:0,1',
-    //             'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-    //             'biaya_akomodasi' => 'sometimes|numeric',
-    //             'pihak_pemberi_biaya' => 'sometimes|string',
-    //             'tim_project' => 'nullable|array',
-    //             'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
-    //         ]);
-
-    //         $data = $request->except(['lampiran_proyek', 'tim_project']);
-
-    //         // Proses upload lampiran jika ada
-    //         if ($request->hasFile('lampiran_proyek')) {
-    //             $data['lampiran_proyek'] = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
-    //         }
-
-    //         // Update data proyek
-    //         $project->update($data);
-
-    //         // Update tim proyek (jika ada)
-    //         if ($request->has('tim_project')) {
-    //             // Hapus tim sebelumnya
-    //             TimProject::where('id_project', $project->id)->delete();
-
-    //             // Tambah tim baru
-    //             foreach ($request->tim_project as $tim) {
-    //                 TimProject::create([
-    //                     'id_project' => $project->id,
-    //                     'id_karyawan' => $tim['id_karyawan'],
-    //                 ]);
-    //             }
-    //         }
-
-    //         DB::commit();
-    //         return response()->json(['id' => '1', 'data' => $project]);
-    //     } catch (ValidationException $e) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => $e->errors()], 422);
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => 'Gagal mengupdate proyek. Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
-    // public function updateProject(Request $request, $id)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         $project = Project::findOrFail($id);
-
-    //         // Decode JSON jika dikirim dalam bentuk string
-    //         $request->merge([
-    //             'tim_project' => is_string($request->tim_project) ? json_decode($request->tim_project, true) : $request->tim_project,
-    //             'aktifitas' => is_string($request->aktifitas) ? json_decode($request->aktifitas, true) : $request->aktifitas
-    //         ]);
-
-    //         $request->validate([
-    //             'nama_proyek' => 'sometimes|string',
-    //             'client' => 'sometimes|string',
-    //             'total_nilai_kontrak' => 'sometimes|numeric',
-    //             'rencana_biaya' => 'sometimes|numeric',
-    //             'realisasi_budget' => 'sometimes|numeric',
-    //             'start_date' => 'sometimes|date',
-    //             'end_date' => 'sometimes|date|after_or_equal:start_date',
-    //             'kategori' => 'required|in:0,1',
-    //             'lampiran_proyek' => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png',
-    //             'biaya_akomodasi' => 'sometimes|numeric',
-    //             'pihak_pemberi_biaya' => 'sometimes|string',
-    //             'tim_project' => 'nullable|array',
-    //             'tim_project.*.id_karyawan' => 'required|exists:karyawans,id',
-    //             'aktifitas' => 'nullable|array',
-    //             'aktifitas.*.aktivitas' => 'required|string',
-    //             'aktifitas.*.pic' => 'required|string',
-    //             'aktifitas.*.biaya' => 'required|numeric',
-    //             'aktifitas.*.start_date' => 'required|date',
-    //             'aktifitas.*.end_date' => 'required|date|after_or_equal:aktifitas.*.start_date',
-    //         ]);
-
-    //         $data = $request->except(['lampiran_proyek', 'tim_project', 'aktifitas']);
-
-    //         // Upload lampiran jika ada file baru
-    //         if ($request->hasFile('lampiran_proyek')) {
-    //             $data['lampiran_proyek'] = $request->file('lampiran_proyek')->store('lampiran_proyek', 'public');
-    //         }
-
-    //         // Update project
-    //         $project->update($data);
-
-    //         // Update tim proyek
-    //         if ($request->has('tim_project')) {
-    //             TimProject::where('id_project', $project->id)->delete();
-    //             foreach ($request->tim_project as $tim) {
-    //                 TimProject::create([
-    //                     'id_project' => $project->id,
-    //                     'id_karyawan' => $tim['id_karyawan'],
-    //                 ]);
-    //             }
-    //         }
-
-    //         // Tambah ulang semua aktivitas baru (jika ada)
-    //         if ($request->has('aktifitas')) {
-    //             // Hapus semua aktifitas lama
-    //             Aktifitas::where('id_project', $project->id)->delete();
-
-    //             foreach ($request->aktifitas as $akt) {
-    //                 Aktifitas::create([
-    //                     'aktivitas' => $akt['aktivitas'],
-    //                     'pic' => $akt['pic'],
-    //                     'biaya' => $akt['biaya'],
-    //                     'start_date' => $akt['start_date'],
-    //                     'end_date' => $akt['end_date'],
-    //                     'id_project' => $project->id,
-    //                 ]);
-    //             }
-    //         }
-
-    //         DB::commit();
-    //         return response()->json(['id' => '1', 'data' => $project]);
-    //     } catch (ValidationException $e) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => $e->errors()], 422);
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-    //         return response()->json(['id' => '0', 'data' => 'Gagal mengupdate proyek. Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
 
 
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProgresController;
+use App\Http\Controllers\ExportController;
 // use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::group([
@@ -87,7 +88,10 @@ Route::group([
     Route::post('/payment/{id}', [ProjectController::class, 'paymentProyek']);
     Route::post('/update/{id}', [ProjectController::class, 'updateProject']);
     Route::delete('/delete/{id}', [ProjectController::class, 'deleteProject']);
+
+    Route::get('/export/{status?}', [ExportController::class, 'export']);
     
+    Route::post('/update-aktifitas/{id}', [ProjectController::class, 'updateAktifitas']);
     Route::post('/aktifitas/{id}', [ProjectController::class, 'selesaikanAktifitas']);
     // tim
     Route::get('/detail/{id}', [ProjectController::class, 'detailProject']);
