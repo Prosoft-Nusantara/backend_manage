@@ -383,12 +383,36 @@ class ProjectController extends Controller
     }
 
     // 7. Detail proyek + tim
+    // public function detailProject($id)
+    // {
+    //     try {
+    //         $project = Project::with('manager', 'timProject', 'aktifitasProject')->findOrFail($id);
+
+    //         // Tambahkan nama tim ke setiap anggota tim
+    //         foreach ($project->timProject as $tim) {
+    //             if ($tim->jenis_tim == '0') {
+    //                 $coor = Coordinator::find($tim->id_tim);
+    //                 $tim->nama_tim = $coor ? $coor->nama : 'Tidak ditemukan';
+    //             } elseif ($tim->jenis_tim == '1') {
+    //                 $ops = Operasional::find($tim->id_tim);
+    //                 $tim->nama_tim = $ops ? $ops->nama : 'Tidak ditemukan';
+    //             } else {
+    //                 $tim->nama_tim = 'Tidak diketahui';
+    //             }
+    //         }
+
+    //         return response()->json(['id' => '1', 'data' => $project]);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['id' => '0', 'data' => 'Gagal mengambil detail proyek']);
+    //     }
+    // }
+
     public function detailProject($id)
     {
         try {
             $project = Project::with('manager', 'timProject', 'aktifitasProject')->findOrFail($id);
 
-            // Tambahkan nama tim ke setiap anggota tim
+            // --- Tambah nama tim ---
             foreach ($project->timProject as $tim) {
                 if ($tim->jenis_tim == '0') {
                     $coor = Coordinator::find($tim->id_tim);
@@ -401,9 +425,20 @@ class ProjectController extends Controller
                 }
             }
 
+            // --- Hitung keterangan tambahan ---
+            $aktivitasLebihDeadline = $project->aktifitasProject
+                ->some(fn($act) => $act->end_date > $project->end_date);
+
+            $totalBiayaAktivitas = $project->aktifitasProject->sum('biaya');
+            $biayaLebihRencana = $totalBiayaAktivitas > $project->rencana_biaya;
+
+            // --- Tambahkan ke response ---
+            $project->aktivitas_lebih_deadline   = $aktivitasLebihDeadline;
+            $project->biaya_aktivitas_lebih_rencana = $biayaLebihRencana;
+
             return response()->json(['id' => '1', 'data' => $project]);
         } catch (\Throwable $th) {
-            return response()->json(['id' => '0', 'data' => 'Gagal mengambil detail proyek']);
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil detail proyek'], 500);
         }
     }
 
