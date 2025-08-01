@@ -12,11 +12,13 @@ class Aktifitas extends Model
     protected $fillable = [
         'aktivitas',
         'pic',
-        'biaya',
-        'start_date',
-        'end_date',
         'status',
         'file',
         'id_project',
     ];
+
+    public function biayaAktivitas()
+    {
+        return $this->hasMany(BiayaAktivitas::class, 'id_aktivitas');
+    }
 }

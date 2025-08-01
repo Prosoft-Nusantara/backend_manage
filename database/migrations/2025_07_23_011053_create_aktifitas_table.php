@@ -17,9 +17,6 @@ class CreateAktifitasTable extends Migration
             $table->id();
             $table->string('aktivitas');
             $table->string('pic');
-            $table->integer('biaya');
-            $table->date('start_date');
-            $table->date('end_date');
             $table->enum('status', [
                 '0', // belum selesai
                 '1', // selesai

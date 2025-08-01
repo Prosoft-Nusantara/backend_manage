@@ -15,6 +15,7 @@ class CreateProjectsTable extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->string('nomor_pemesanan');
             $table->string('nama_proyek');
             $table->string('client');
             $table->integer('total_nilai_kontrak');
@@ -24,7 +25,7 @@ class CreateProjectsTable extends Migration
             $table->string('invoice')->nullable();
             $table->date('start_date');
             $table->date('end_date');
-            $table->string('lampiran_proyek');
+            $table->string('lampiran_proyek')->nullable();
             $table->enum('status',[
                 '0', // belum selesai
                 '1', // piutang
