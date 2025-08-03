@@ -21,7 +21,7 @@ class ProgresController extends Controller
                 'id_project' => 'required|integer',
                 'tanggal' => 'required|date',
                 'keterangan' => 'required|string',
-                'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048'
+                'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10048'
             ]);
 
             // Simpan file ke storage
@@ -49,7 +49,7 @@ class ProgresController extends Controller
             $validate = $request->validate([
                 'tanggal' => 'sometimes|date',
                 'keterangan' => 'sometimes|string',
-                'file' => 'sometimes|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048'
+                'file' => 'sometimes|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10048'
             ]);
 
             // Update data

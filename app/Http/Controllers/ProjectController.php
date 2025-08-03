@@ -491,7 +491,7 @@ class ProjectController extends Controller
     // {
     //     try {
     //         $validateData = $request->validate([
-    //             'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048'
+    //             'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10048'
     //         ]);
     //         $aktifitas = Aktifitas::findOrFail($id);
 
@@ -524,10 +524,10 @@ class ProjectController extends Controller
                 'pic'       => 'required|string|max:255',
                 'biayas'    => 'required|array',
                 'biayas.*.keterangan' => 'required|string',
-                'biayas.*.biaya'      => 'required|numeric|min:0',
-                'biayas.*.start_date' => 'required|date',
-                'biayas.*.end_date'   => 'required|date|after_or_equal:biayas.*.start_date',
-                'file'      => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
+                'biayas.*.realisasi_biaya'      => 'required|numeric|min:0',
+                'biayas.*.realisasi_start_date' => 'required|date',
+                'biayas.*.realisasi_end_date'   => 'required|date|after_or_equal:biayas.*.start_date',
+                'file'      => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10048',
             ]);
 
             if ($validator->fails()) {
@@ -556,17 +556,18 @@ class ProjectController extends Controller
             ]);
 
             /* ---------- 5. Hapus biaya lama, insert baru ---------- */
-            $aktivitas->biayaAktivitas()->delete();
+            // $aktivitas->biayaAktivitas()->delete();
             $total = 0;
             foreach ($request->biayas as $by) {
-                BiayaAktivitas::create([
+            
+                BiayaAktivitas::where('id_aktivitas', $aktivitas->id)->update([
                     'keterangan'  => $by['keterangan'],
-                    'biaya'       => $by['biaya'],
-                    'start_date'  => $by['start_date'],
-                    'end_date'    => $by['end_date'],
+                    'realisasi_biaya'       => $by['realisasi_biaya'],
+                    'realisasi_start_date'  => $by['realisasi_start_date'],
+                    'realisasi_end_date'    => $by['realisasi_end_date'],
                     'id_aktivitas' => $aktivitas->id,
                 ]);
-                $total += $by['biaya'];
+                $total += $by['realisasi_biaya'];
             }
 
             /* ---------- 6. Upload file ---------- */

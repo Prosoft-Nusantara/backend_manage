@@ -19,6 +19,9 @@ class CreateBiayaAktivitasTable extends Migration
             $table->integer('biaya');
             $table->date('start_date');
             $table->date('end_date');
+            $table->integer('realisasi_biaya')->nullable();
+            $table->date('realisasi_start_date')->nullable();
+            $table->date('realisasi_end_date')->nullable();
             $table->foreignId('id_aktivitas')->constrained('aktifitas')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

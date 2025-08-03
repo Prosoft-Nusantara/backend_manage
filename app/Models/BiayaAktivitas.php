@@ -14,6 +14,9 @@ class BiayaAktivitas extends Model
         'biaya',
         'start_date',
         'end_date',
+        'realisasi_biaya',
+        'realisasi_start_date',
+        'realisasi_end_date',
         'id_aktivitas',
     ];
 }
