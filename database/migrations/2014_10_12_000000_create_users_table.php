@@ -22,7 +22,9 @@ class CreateUsersTable extends Migration
             $table->enum('level',[
                 '0', // super admin
                 '1', // divisi
-                '2' // manager
+                '2', // manager
+                '3', // coordinator
+                '4', // kaunit
             ]);
             $table->text('active_token')->nullable();
             $table->rememberToken();

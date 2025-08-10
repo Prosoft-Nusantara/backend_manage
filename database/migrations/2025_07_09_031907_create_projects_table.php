@@ -26,11 +26,16 @@ class CreateProjectsTable extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->string('lampiran_proyek')->nullable();
+            $table->text('keterangan_rejek')->nullable();
             $table->enum('status',[
-                '0', // belum selesai
+                '-', // belum divalidasi divisi dan kaunit
+                '0-', // sudah divalidasi divisi dan belum di validasi kaunit
+                '-0', // sudah divalidasi kaunit dan belum di validasi divisi
+                '0-0', // belum selesai -> accepted
                 '1', // piutang
-                '2' // lunas
-            ])->default('0');
+                '2', // lunas
+                '3' // rejek
+            ])->default('-');
             $table->enum('kategori',[
                 '0', //  TIK 1A
                 '1' //  TIK 1B

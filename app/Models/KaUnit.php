@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Progres extends Model
+class KaUnit extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'tanggal',
-        'nama',
-        'keterangan',
-        'file',
-        'id_project',
+        'nama_unit',
+        'deskripsi',
+        'id_kepala_unit'
     ];
 }

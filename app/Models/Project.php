@@ -27,6 +27,7 @@ class Project extends Model
         'surat_pembayaran', // file
         'biaya_akomodasi',
         'pihak_pemberi_biaya',
+        'keterangan_rejek',
         'id_manager',
     ];
 

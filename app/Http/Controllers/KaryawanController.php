@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Divisi;
+use App\Models\KaUnit;
 use App\Models\Manager;
 use App\Models\Karyawan;
 use App\Models\Coordinator;
@@ -104,6 +105,100 @@ class KaryawanController extends Controller
             return response()->json(['id' => '1', 'data' => 'Divisi berhasil dihapus']);
         } catch (\Throwable $th) {
             return response()->json(['id' => '0', 'data' => 'Gagal menghapus divisi']);
+        }
+    }
+
+    // ========================= UNIT =========================
+
+     public function getAllUnit()
+    {
+        try {
+            $units = KaUnit::with('kepalaDivisi')->get();
+            return response()->json(['id' => '1', 'data' => $units]);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil data divisi']);
+        }
+    }
+
+    public function createUnit(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string',
+                'nama_unit' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+            ]);
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'level' => '1'
+            ]);
+
+            $unit = KaUnit::create([
+                'nama_unit' => $request->nama_unit,
+                'deskripsi' => $request->deskripsi,
+                'id_kepala_unit' => $user->id
+            ]);
+
+            return response()->json([
+                'id' => '1',
+                'data' => $unit
+            ], 201);
+        } catch (ValidationException $e) {
+            // Jika validasi gagal, tampilkan semua error
+            return response()->json([
+                'id' => '0',
+                'data' => $e->errors() // berisi array: ['email' => ['Email sudah dipakai.'], ...]
+            ], 422);
+        } catch (\Throwable $th) {
+            // Untuk error selain validasi (misal DB error, dll)
+            return response()->json([
+                'id' => '0',
+                'data' => 'Gagal membuat unit. Error: ' . $th->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function updateUnit(Request $request, $id)
+    {
+        try {
+            $unit = KaUnit::findOrFail($id);
+
+            $request->validate([
+                'nama_unit' => 'sometimes|string|max:255',
+                'deskripsi' => 'sometimes|string',
+                'id_kepala_unit' => 'sometimes|exists:users,id',
+            ]);
+
+            $unit->update($request->all());
+
+            return response()->json(['id' => '1', 'data' => $unit]);
+        } catch (ValidationException $e) {
+            // Jika validasi gagal, tampilkan semua error
+            return response()->json([
+                'id' => '0',
+                'data' => $e->errors() // berisi array: ['email' => ['Email sudah dipakai.'], ...]
+            ], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengupdate unit']);
+        }
+    }
+
+    public function deleteUnit($id)
+    {
+        try {
+            $unit = KaUnit::findOrFail($id);
+            User::where('id', $unit->id_kepala_unit)->delete();
+            $unit->delete();
+
+            return response()->json(['id' => '1', 'data' => 'unit berhasil dihapus']);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal menghapus unit']);
         }
     }
 

@@ -27,12 +27,31 @@ class ProgresController extends Controller
             // Simpan file ke storage
             $path = $request->file('file')->store('progres_files', 'public');
 
+            $dataUser = auth()->user();
+            // Tentukan label berdasarkan level user
+            switch ($dataUser->level) {
+                case '0':
+                    $label = 'admin';
+                    break;
+                case '1':
+                    $label = 'divisi';
+                    break;
+                case '2':
+                    $label = 'manager';
+                    break;
+                default:
+                    $label = 'coordinator';
+                    break;
+            }
+            // Gabungkan label dan nama user
+            $nama = $label . ' - ' . $dataUser->name;
             // Simpan ke database
             $progres = Progres::create([
-                'id_project' => $request->id_project,
-                'tanggal' => $request->tanggal,
-                'keterangan' => $request->keterangan,
-                'file' => $path
+                'id_project'  => $request->id_project,
+                'nama'        => $nama,
+                'tanggal'     => $request->tanggal,
+                'keterangan'  => $request->keterangan,
+                'file'        => $path
             ]);
 
             return response()->json(['status' => 'success', 'data' => $progres], 201);

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\Validator;
 
 class ProjectController extends Controller
 {
@@ -58,15 +59,22 @@ class ProjectController extends Controller
     }
 
     // 2. Melihat proyek berdasarkan manager
-    public function getProjectsByManager($id)
+    public function getProjectsByManager()
     {
         try {
-            $projects = Project::where('id_manager', $id)->with('manager')->get();
+            // $excludedStatuses = ['-', '0-', '-0'];
+
+            $projects = Project::where('id_manager', auth()->user()->id)
+                // ->whereNotIn('status', $excludedStatuses)
+                ->with('manager')
+                ->get();
+
             return response()->json(['id' => '1', 'data' => $projects]);
         } catch (\Throwable $th) {
             return response()->json(['id' => '0', 'data' => 'Gagal mengambil proyek']);
         }
     }
+
 
     // CREATE
     // public function createProject(Request $request)
@@ -515,11 +523,71 @@ class ProjectController extends Controller
     //     }
     // }
 
+    public function actionProject(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'id_project' => 'required|exists:projects,id',
+                'status'     => 'required|in:0,3', // 0 approve, 3 reject
+                'keterangan_rejek' => 'string',
+            ]);
+
+            $user = auth()->user();
+            $project = Project::findOrFail($validated['id_project']);
+            $currentStatus = $project->status;
+
+            // Penanganan reject langsung oleh siapa pun
+            if ($validated['status'] == '3') {
+                $project->update(['status' => '3', 'keterangan_rejek' => $validated['keterangan_rejek']]);
+
+                return response()->json(['id' => '1', 'data' => 'Project berhasil direject.']);
+            }
+
+            // Penanganan approve berdasarkan level user
+            if ($user->level == '1') { // Divisi
+                if ($currentStatus == '-') {
+                    $project->update(['status' => '0-']);
+                } elseif ($currentStatus == '-0') {
+                    $project->update(['status' => '0-0']);
+                } elseif (in_array($currentStatus, ['0-', '0-0'])) {
+                    // Sudah divalidasi, tidak perlu update lagi
+                    return response()->json(['id' => '1', 'data' => 'Project sudah divalidasi oleh divisi.']);
+                } else {
+                    return response()->json(['id' => '0', 'data' => 'Status project tidak valid untuk divisi.'], 400);
+                }
+
+                return response()->json(['id' => '1', 'data' => 'Project berhasil divalidasi oleh divisi.']);
+            }
+
+            if ($user->level == '4') { // Kaunit
+                if ($currentStatus == '-') {
+                    $project->update(['status' => '-0']);
+                } elseif ($currentStatus == '0-') {
+                    $project->update(['status' => '0-0']);
+                } elseif (in_array($currentStatus, ['-0', '0-0'])) {
+                    return response()->json(['id' => '1', 'data' => 'Project sudah divalidasi oleh kaunit.']);
+                } else {
+                    return response()->json(['id' => '0', 'data' => 'Status project tidak valid untuk kaunit.'], 400);
+                }
+
+                return response()->json(['id' => '1', 'data' => 'Project berhasil divalidasi oleh kaunit.']);
+            }
+
+            return response()->json(['id' => '0', 'data' => 'Anda tidak memiliki akses.'], 403);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'id' => '0',
+                'data' => 'Gagal memproses project. Error: ' . $th->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function selesaikanAktifitas(Request $request, $id)
     {
         try {
             /* ---------- 1. Validasi & pesan rinci ---------- */
-            $validator = \Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 'aktivitas' => 'required|string|max:255',
                 'pic'       => 'required|string|max:255',
                 'biayas'    => 'required|array',
@@ -559,7 +627,7 @@ class ProjectController extends Controller
             // $aktivitas->biayaAktivitas()->delete();
             $total = 0;
             foreach ($request->biayas as $by) {
-            
+
                 BiayaAktivitas::where('id_aktivitas', $aktivitas->id)->update([
                     'keterangan'  => $by['keterangan'],
                     'realisasi_biaya'       => $by['realisasi_biaya'],

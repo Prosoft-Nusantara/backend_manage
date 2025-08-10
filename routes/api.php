@@ -45,6 +45,12 @@ Route::group([
     Route::post('/divisi/{id}', [KaryawanController::class, 'updateDivisi']);
     Route::delete('/divisi/{id}', [KaryawanController::class, 'deleteDivisi']);
 
+    // Unit
+    Route::get('/unit', [KaryawanController::class, 'getAllUnit']);
+    Route::post('/unit', [KaryawanController::class, 'createUnit']);
+    Route::post('/unit/{id}', [KaryawanController::class, 'updateUnit']);
+    Route::delete('/unit/{id}', [KaryawanController::class, 'deleteUnit']);
+
     // Manager
     Route::get('/manager', [KaryawanController::class, 'getAllManager']);
     Route::post('/manager', [KaryawanController::class, 'createManager']);
@@ -82,12 +88,13 @@ Route::group([
     Route::get('/ongoing', [ProjectController::class, 'getProjectsOnGoing']);
     Route::get('/piutang', [ProjectController::class, 'getProjectsPiutang']);
     Route::get('/lunas', [ProjectController::class, 'getProjectsLunas']);
-    Route::get('/manager/{id}', [ProjectController::class, 'getProjectsByManager']);
+    Route::get('/manager', [ProjectController::class, 'getProjectsByManager']);
     Route::post('/create', [ProjectController::class, 'createProject']);
     Route::post('/complete/{id}', [ProjectController::class, 'completeProject']);
     Route::post('/payment/{id}', [ProjectController::class, 'paymentProyek']);
     Route::post('/update/{id}', [ProjectController::class, 'updateProject']);
     Route::delete('/delete/{id}', [ProjectController::class, 'deleteProject']);
+    Route::post('/action', [ProjectController::class, 'actionProject']);
 
     Route::get('/export/{status?}', [ExportController::class, 'export']);
     

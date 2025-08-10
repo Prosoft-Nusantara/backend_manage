@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProgresTable extends Migration
+class CreateKaUnitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateProgresTable extends Migration
      */
     public function up()
     {
-        Schema::create('progres', function (Blueprint $table) {
+        Schema::create('ka_units', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal');
-            $table->text('nama');
-            $table->text('keterangan');
-            $table->string('file')->nullable();
-            $table->foreignId('id_project')->constrained('projects')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('nama_unit');
+            $table->string('deskripsi');
+            $table->foreignId('id_kepala_unit')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ class CreateProgresTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('progres');
+        Schema::dropIfExists('ka_units');
     }
 }
