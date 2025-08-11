@@ -172,7 +172,7 @@ class ProjectController extends Controller
                 'realisasi_budget'    => 0,
                 'start_date'          => $validated['start_date'],
                 'end_date'            => $validated['end_date'],
-                'id_manager'          => $validated['id_manager'],
+                'id_manager'          => auth()->user()->id,
                 'kategori'            => $validated['kategori'],
                 'lampiran_proyek'     => $lampiranPath,
             ];
@@ -394,7 +394,7 @@ class ProjectController extends Controller
             'start_date'          => 'required|date',
             'end_date'            => 'required|date|after_or_equal:start_date',
             'kategori'            => 'required|in:0,1',
-            'id_manager'          => 'required|exists:users,id',
+            // 'id_manager'          => 'required|exists:users,id',
             'lampiran_proyek'     => 'nullable|file|mimes:pdf,doc,docx,xlsx,jpg,png|max:5120',
 
             // 'biaya_akomodasi'     => 'required_if:kategori,0|numeric|min:0',
