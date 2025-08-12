@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Validator;
+use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
