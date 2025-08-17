@@ -135,7 +135,7 @@ class KaryawanController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
-                'level' => '1'
+                'level' => '4'
             ]);
 
             $unit = KaUnit::create([
@@ -229,7 +229,8 @@ class KaryawanController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => bcrypt($request->password)
+                'password' => bcrypt($request->password),
+                'level' => '2'
             ]);
 
             $manager = Manager::create([
