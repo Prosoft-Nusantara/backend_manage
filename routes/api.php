@@ -53,6 +53,7 @@ Route::group([
 
     // Manager
     Route::get('/manager', [KaryawanController::class, 'getAllManager']);
+    Route::get('/my-manager', [KaryawanController::class, 'getMyManager']);
     Route::post('/manager', [KaryawanController::class, 'createManager']);
     Route::post('/manager/{id}', [KaryawanController::class, 'updateManager']);
     Route::delete('/manager/{id}', [KaryawanController::class, 'deleteManager']);

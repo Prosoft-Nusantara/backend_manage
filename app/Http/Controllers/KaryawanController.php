@@ -214,6 +214,16 @@ class KaryawanController extends Controller
         }
     }
 
+    public function getMyManager()
+    {
+        try {
+            $manager = Manager::with('user', 'divisi')->where('id_divisi', auth()->user()->id)->get();
+            return response()->json(['id' => '1', 'data' => $manager]);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil data manager']);
+        }
+    }
+
     public function createManager(Request $request)
     {
         try {
@@ -223,7 +233,7 @@ class KaryawanController extends Controller
                 'password' => 'required|string',
                 'nama_manager' => 'required|string',
                 'deskripsi' => 'required|string',
-                'id_divisi' => 'required|exists:divisis,id'
+                'id_divisi' => 'required|exists:users,id'
             ]);
 
             $user = User::create([

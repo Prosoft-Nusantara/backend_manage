@@ -23,7 +23,7 @@ class Manager extends Model
 
     public function divisi()
     {
-        return $this->belongsTo(Divisi::class, 'id_divisi');
+        return $this->belongsTo(User::class, 'id_divisi');
     }
 
     public function projects()
