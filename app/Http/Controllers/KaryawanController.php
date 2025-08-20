@@ -110,7 +110,7 @@ class KaryawanController extends Controller
 
     // ========================= UNIT =========================
 
-     public function getAllUnit()
+    public function getAllUnit()
     {
         try {
             $units = KaUnit::with('kepalaDivisi')->get();
@@ -321,16 +321,36 @@ class KaryawanController extends Controller
                 'no_hp' => 'required|max:20',
                 'jabatan' => 'required|string|max:100',
                 'id_manager' => 'required',
+                'password' => 'string|min:6',
+                'id_user' => 'string',
             ]);
 
-            Karyawan::create([
-                'nama' => $validated['nama'],
-                'alamat' => $validated['alamat'],
-                'email' => $validated['email'],
-                'no_hp' => $validated['no_hp'],
-                'jabatan' => $validated['jabatan'],
-                'id_manager' => $validated['id_manager'],
-            ]);
+            if ($validated['jabatan'] === '0') {
+                $user =User::create([
+                    'name' => $validated['nama'],
+                    'email' => $validated['email'],
+                    'password' => bcrypt($validated['password']),
+                    'level' => '3'
+                ]);
+                Karyawan::create([
+                    'nama' => $validated['nama'],
+                    'alamat' => $validated['alamat'],
+                    'email' => $validated['email'],
+                    'no_hp' => $validated['no_hp'],
+                    'jabatan' => $validated['jabatan'],
+                    'id_manager' => $validated['id_manager'],
+                    'id_user' => $user->id ?? null,
+                ]);
+            } else {
+                Karyawan::create([
+                    'nama' => $validated['nama'],
+                    'alamat' => $validated['alamat'],
+                    'email' => $validated['email'],
+                    'no_hp' => $validated['no_hp'],
+                    'jabatan' => $validated['jabatan'],
+                    'id_manager' => $validated['id_manager'],
+                ]);
+            }
 
             return response()->json([
                 'id' => '1',

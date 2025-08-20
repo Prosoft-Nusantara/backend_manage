@@ -116,11 +116,9 @@ class AuthController extends Controller
     public function resetPassword(Request $request, $id)
     {
         $validateData = $request->validate([
-            "name" => "required",
-            "email" => "required",
-            'no_hp' => 'required',
-            'metode_pembayaran' => 'required',
-            "password" => "required",
+            "name" => "required|string",
+            "email" => "required|email",
+            "password" => "nullable|string|min:6",
         ]);
 
         $user = User::find($id);
@@ -130,10 +128,9 @@ class AuthController extends Controller
 
         $user->name = $validateData['name'];
         $user->email = $validateData['email'];
-        $user->no_hp = $validateData['no_hp'];
-        $user->password = $validateData['password'];
-        $user->metode_pembayaran = $validateData['metode_pembayaran'];
-
+        if (isset($validateData['password'])) {
+            $user->password = bcrypt($validateData['password']);
+        }
         $user->save();
 
         return response()->json(['message' => 'update users successfully']);

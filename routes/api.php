@@ -89,6 +89,7 @@ Route::group([
     Route::get('/piutang', [ProjectController::class, 'getProjectsPiutang']);
     Route::get('/lunas', [ProjectController::class, 'getProjectsLunas']);
     Route::get('/manager', [ProjectController::class, 'getProjectsByManager']);
+    Route::get('/for-coordinator', [ProjectController::class, 'getProjectsByManagerForCoordinator']);
     Route::post('/create', [ProjectController::class, 'createProject']);
     Route::post('/complete/{id}', [ProjectController::class, 'completeProject']);
     Route::post('/payment/{id}', [ProjectController::class, 'paymentProyek']);

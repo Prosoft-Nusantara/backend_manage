@@ -74,6 +74,22 @@ class ProjectController extends Controller
             return response()->json(['id' => '0', 'data' => 'Gagal mengambil proyek']);
         }
     }
+    
+    public function getProjectsByManagerForCoordinator()
+    {
+        try {
+
+            $idManager = Karyawan::where('id_user', auth()->user()->id)->value('id_manager');
+            $projects = Project::where('id_manager', $idManager)
+                // ->whereNotIn('status', $excludedStatuses)
+                ->with('manager')
+                ->get();
+
+            return response()->json(['id' => '1', 'data' => $projects]);
+        } catch (\Throwable $th) {
+            return response()->json(['id' => '0', 'data' => 'Gagal mengambil proyek']);
+        }
+    }
 
 
     // CREATE

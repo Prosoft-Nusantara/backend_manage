@@ -23,7 +23,7 @@ class CreateKaryawansTable extends Migration
                 '0', //coordinator
                 '1' //operasional
             ]);
-            $table->foreignId('id_manager')->constrained('managers')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_manager')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->string('id_user')->nullable();
             $table->timestamps();
         });

@@ -16,6 +16,7 @@ class Karyawan extends Model
         'no_hp',
         'jabatan',
         'id_manager',
+        'id_user',
     ];
 
     public function manager()
